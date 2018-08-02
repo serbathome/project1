@@ -126,6 +126,9 @@ def review():
     bookid = request.form.get('bookid')
     reviewtext = request.form.get('reviewtext')
     rating = request.form.get('rating')
+
+# todo: check if review already exists and hide the form
+
     command = f"insert into reviews(bookid, userid, rating, comments) values ({bookid}, {userid}, {rating}, '{reviewtext}')"
     db.execute(command)
     db.commit()
