@@ -116,3 +116,8 @@ def book(bookid):
     goodreads["ratings_count"] = res.json()["books"][0]["ratings_count"]
     result = [bookinfo, reviews, goodreads]
     return render_template("book.html", result=result)
+
+
+@app.route("/review", methods=["POST"])
+def review():
+    return render_template("store.html")
