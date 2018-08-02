@@ -1,0 +1,28 @@
+<html>
+
+<head>
+    <title>Project 1 web app</title>
+</head>
+
+<body>
+    <h1>Book ratings</h1>
+
+    <p>Login for registered users</p>
+    <form action="{{ url_for('store') }}" method="POST">
+        Username:
+        <input type="text" name="username" placeholder="Username"> Password:
+        <input type="password" name="password" placeholder="password">
+        <button>Login</button>
+    </form>
+    <p>If you are not registered yet, please fill the form</p>
+    <form action="{{ url_for('newuser') }}" method="POST">
+        Username:
+        <input type="text" name="username" placeholder="Username"> Password:
+        <input type="password" name="password" placeholder="password">
+        <button>Sign up</button>
+    </form>
+    <p>Here goes infomation about the session</p>
+    <p>{{ session }}</p>
+</body>
+
+</html>
