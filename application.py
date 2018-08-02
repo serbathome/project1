@@ -1,7 +1,7 @@
 import os
 
 import requests
-from flask import Flask, session, render_template, request
+from flask import Flask, session, render_template, request, abort
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -120,4 +120,19 @@ def book(bookid):
 
 @app.route("/review", methods=["POST"])
 def review():
-    return render_template("store.html")
+    if session["userid"] is None or session["userid"] == 0:
+        return "Authenticate first"
+    userid = session['userid']
+    bookid = request.form.get('bookid')
+    reviewtext = request.form.get('reviewtext')
+    rating = request.form.get('rating')
+    command = f"insert into reviews(bookid, userid, rating, comments) values ({bookid}, {userid}, {rating}, '{reviewtext}')"
+    db.execute(command)
+    db.commit()
+    # return render_template("store.html")
+    return book(bookid)
+
+
+@app.route("/api/<string:isbn>")
+def api(isbn):
+    abort(404)
