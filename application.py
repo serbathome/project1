@@ -46,8 +46,10 @@ def store():
     if request.method == "POST":
         username = sanitize(request.form.get("username"))
         password = sanitize(request.form.get("password"))
-        command = f"select id from users where name = '{username}' and password = crypt('{password}', password)"
-        result = db.execute(command)
+        # command = f"select id from users where name = '{username}' and password = crypt('{password}', password)"
+        # result = db.execute(command)
+        result = db.execute("select id from users where name = :username and password = crypt(:password, password)",
+                            {"username": username, "password": password})
         if result.rowcount == 0:
             error["header"] = "Wrong password!"
             error["message"] = "You have entered a wrong password or maybe a wrong username. Or both."
@@ -78,8 +80,10 @@ def newuser():
             error["message"] = "Pick another name, because the one you have choosen is already taken"
             return render_template("error.html", error=error)
         else:
-            command = f"insert into users (name, password) values ('{username}', crypt('{password}', gen_salt('bf')))"
-            db.execute(command)
+            # command = f"insert into users (name, password) values ('{username}', crypt('{password}', gen_salt('bf')))"
+            # db.execute(command)
+            db.execute("insert into users (name, password) values (:username, crypt(:password, gen_salt('bf')))",
+                       {"username": username, "password": password})
             db.commit()
             return render_template("login.html")
 
@@ -97,7 +101,7 @@ def search():
         return "Authenticate first"
     field = sanitize(request.form.get("field"))
     value = sanitize(request.form.get("value"))
-    command = f"select * from books where {field} ilike '%{value}%'"
+    command = "select * from books where {} ilike '%{}%'".format(field, value)
     result = db.execute(command).fetchall()
     return render_template("search.html", result=result)
 
@@ -107,8 +111,10 @@ def book(bookid):
     if session["userid"] is None or session["userid"] == 0:
         return "Authenticate first"
     # get information about the book
-    command = f"select * from books where id = {bookid}"
-    bookinfo = db.execute(command).fetchone()
+    # command = f"select * from books where id = {bookid}"
+    # bookinfo = db.execute(command).fetchone()
+    bookinfo = db.execute("select * from books where id = :bookid",
+                          {"bookid": bookid}).fetchone()
     # todo: check if review already exists and hide the form
     if db.execute("select id from reviews where userid= :userid and bookid= :bookid",
                   {"userid": session["userid"], "bookid": bookid}).rowcount > 0:
@@ -116,8 +122,10 @@ def book(bookid):
     else:
         noReview = True
     # get all reviews for this book
-    command = f"select rating, comments, name from reviews join users on (reviews.userid = users.id) where bookid = {bookid}"
-    reviews = db.execute(command).fetchall()
+    # command = f"select rating, comments, name from reviews join users on (reviews.userid = users.id) where bookid = {bookid}"
+    # reviews = db.execute(command).fetchall()
+    reviews = db.execute("select rating, comments, name from reviews join users on (reviews.userid = users.id) where bookid = :bookid",
+                         {"bookid": bookid}).fetchall()
     # get rating from goodreads
     isbn = bookinfo.isbn
     params = {"key": "nFyzewnTjIGn2qGdZ2dQ", "isbns": isbn}
@@ -146,8 +154,10 @@ def review():
         error["message"] = "It appears you have already submitted review for this book"
         return render_template("error.html", error=error)
 
-    command = f"insert into reviews(bookid, userid, rating, comments) values ({bookid}, {userid}, {rating}, '{reviewtext}')"
-    db.execute(command)
+    # command = f"insert into reviews(bookid, userid, rating, comments) values ({bookid}, {userid}, {rating}, '{reviewtext}')"
+    # db.execute(command)
+    db.execute("insert into reviews(bookid, userid, rating, comments) values (:bookid, :userid, :rating, :reviewtext)",
+               {"bookid": bookid, "userid": userid, "rating": rating, "reviewtext": reviewtext})
     db.commit()
     # return render_template("store.html")
     return book(bookid)
