@@ -1,7 +1,7 @@
 import os
 
 import requests
-from flask import Flask, session, render_template, request, abort
+from flask import Flask, session, render_template, request, abort, jsonify
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -155,4 +155,28 @@ def review():
 
 @app.route("/api/<string:isbn>")
 def api(isbn):
-    abort(404)
+    isbn = sanitize(isbn)
+    result = db.execute(
+        "select * from books where isbn = :isbn", {"isbn": isbn})
+    if result.rowcount == 0:
+        abort(404)
+    bookinfo = result.fetchone()
+    res = {}
+    res["title"] = bookinfo.title
+    res["author"] = bookinfo.author
+    res["year"] = bookinfo.year
+    res["isbn"] = bookinfo.isbn
+
+    result = db.execute("select count(*) as count, to_char(avg(rating),'9D9') as score from reviews where bookid = :bookid",
+                        {"bookid": bookinfo.id})
+    review = result.fetchone()
+    if review.count > 0:
+        res["review_count"] = review.count
+        res["average_score"] = float(review.score)
+    else:
+        params = {"key": "nFyzewnTjIGn2qGdZ2dQ", "isbns": isbn}
+        resp = requests.get("https://www.goodreads.com/book/review_counts.json",
+                            params=params)
+        res["review_count"] = resp.json()["books"][0]["ratings_count"]
+        res["average_score"] = float(resp.json()["books"][0]["average_rating"])
+    return jsonify(res)
