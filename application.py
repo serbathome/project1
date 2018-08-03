@@ -24,6 +24,12 @@ db = scoped_session(sessionmaker(bind=engine))
 error = {}
 
 
+def sanitize(input):
+    temp = input.replace("'", "")
+    result = temp.replace('"', '')
+    return result
+
+
 @app.route("/")
 def index():
     if session.get("userid") is None:
@@ -38,8 +44,8 @@ def index():
 @app.route("/store", methods=["POST", "GET"])
 def store():
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+        username = sanitize(request.form.get("username"))
+        password = sanitize(request.form.get("password"))
         command = f"select id from users where name = '{username}' and password = crypt('{password}', password)"
         result = db.execute(command)
         if result.rowcount == 0:
@@ -64,8 +70,8 @@ def newuser():
     if request.method == "GET":
         return render_template("newuser.html")
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
+        username = sanitize(request.form.get("username"))
+        password = sanitize(request.form.get("password"))
         # check if user already exists
         if db.execute("select id from users where name = :username", {"username": username}).rowcount > 0:
             error["header"] = "User already exist"
@@ -89,8 +95,8 @@ def logout():
 def search():
     if session["userid"] is None or session["userid"] == 0:
         return "Authenticate first"
-    field = request.form.get("field")
-    value = request.form.get("value")
+    field = sanitize(request.form.get("field"))
+    value = sanitize(request.form.get("value"))
     command = f"select * from books where {field} ilike '%{value}%'"
     result = db.execute(command).fetchall()
     return render_template("search.html", result=result)
@@ -124,7 +130,7 @@ def review():
         return "Authenticate first"
     userid = session['userid']
     bookid = request.form.get('bookid')
-    reviewtext = request.form.get('reviewtext')
+    reviewtext = sanitize(request.form.get('reviewtext'))
     rating = request.form.get('rating')
 
 # todo: check if review already exists and hide the form
