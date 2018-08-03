@@ -109,6 +109,12 @@ def book(bookid):
     # get information about the book
     command = f"select * from books where id = {bookid}"
     bookinfo = db.execute(command).fetchone()
+    # todo: check if review already exists and hide the form
+    if db.execute("select id from reviews where userid= :userid and bookid= :bookid",
+                  {"userid": session["userid"], "bookid": bookid}).rowcount > 0:
+        noReview = False
+    else:
+        noReview = True
     # get all reviews for this book
     command = f"select rating, comments, name from reviews join users on (reviews.userid = users.id) where bookid = {bookid}"
     reviews = db.execute(command).fetchall()
@@ -120,7 +126,7 @@ def book(bookid):
     goodreads = {}
     goodreads["average_rating"] = res.json()["books"][0]["average_rating"]
     goodreads["ratings_count"] = res.json()["books"][0]["ratings_count"]
-    result = [bookinfo, reviews, goodreads]
+    result = [bookinfo, reviews, goodreads, noReview]
     return render_template("book.html", result=result)
 
 
@@ -133,7 +139,12 @@ def review():
     reviewtext = sanitize(request.form.get('reviewtext'))
     rating = request.form.get('rating')
 
-# todo: check if review already exists and hide the form
+    # todo: check if review already exists and hide the form
+    if db.execute("select id from reviews where userid= :userid and bookid= :bookid",
+                  {"userid": userid, "bookid": bookid}).rowcount > 0:
+        error["header"] = "Error happened when submitting your review"
+        error["message"] = "It appears you have already submitted review for this book"
+        return render_template("error.html", error=error)
 
     command = f"insert into reviews(bookid, userid, rating, comments) values ({bookid}, {userid}, {rating}, '{reviewtext}')"
     db.execute(command)

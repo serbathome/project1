@@ -96,7 +96,8 @@
             </tr>
             {% endfor %}
         </table>
-        {% endif %}
+        {% endif %} {% if result[3] %}
+
         <h2>Submit your review</h2>
         <form action="{{ url_for('review') }}" method="POST">
             <input type="text" hidden name="bookid" value="{{ result[0].id }}">
@@ -124,6 +125,7 @@
             <button type="submit" class="btn btn-primary mb-2">Submit</button>
 
         </form>
+        {% endif %}
     </div>
 </body>
 
