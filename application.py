@@ -1,5 +1,5 @@
 import os
-
+import re
 import requests
 from flask import Flask, session, render_template, request, abort, jsonify
 from flask_session import Session
@@ -27,7 +27,8 @@ error = {}
 def sanitize(input):
     temp = input.replace("'", "")
     result = temp.replace('"', '')
-    return result
+    result = re.sub(" +", " ", result)
+    return result.strip()
 
 
 @app.route("/")
