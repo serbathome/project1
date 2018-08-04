@@ -85,19 +85,23 @@
         </div>
         {% if reviews %}
         <h2>Reviews</h2>
-        <table class="table table-light">
-            <tr>
-                <th>rating</th>
-                <th>comments</th>
-                <th>user</th>
-            </tr>
-            {% for review in reviews %}
-            <tr>
-                <td>{{ review.rating }}</td>
-                <td>{{ review.comments }}</td>
-                <td>{{ review.name }}</td>
-            </tr>
-            {% endfor %}
+        <table class="table table-responsive table-light">
+            <thead class="thead-light">
+                <tr>
+                    <th>rating</th>
+                    <th>comments</th>
+                    <th>user</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for review in reviews %}
+                <tr>
+                    <td>{{ review.rating }}</td>
+                    <td>{{ review.comments }}</td>
+                    <td>{{ review.name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
         {% endif %} {% if noReview %}
 
