@@ -73,6 +73,10 @@ def newuser():
     if request.method == "POST":
         username = sanitize(request.form.get("username"))
         password = sanitize(request.form.get("password"))
+        if username == "" or password == "":
+            error["header"] = "Empty field"
+            error["message"] = "Both username and password should be meaningful"
+            return render_template("error.html", error=error)
         if db.execute("select id from users where name = :username", {"username": username}).rowcount > 0:
             error["header"] = "User already exist"
             error["message"] = "Pick another name, because the one you have choosen is already taken"
@@ -142,6 +146,10 @@ def review():
     userid = session['userid']
     bookid = request.form.get('bookid')
     reviewtext = sanitize(request.form.get('reviewtext'))
+    if reviewtext == "":
+        error["header"] = "Empty field"
+        error["message"] = "Your review should countain meaningful text"
+        return render_template("error.html", error=error)
     rating = request.form.get('rating')
     if db.execute("select id from reviews where userid= :userid and bookid= :bookid",
                   {"userid": userid, "bookid": bookid}).rowcount > 0:
