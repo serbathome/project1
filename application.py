@@ -47,8 +47,6 @@ def store():
     if request.method == "POST":
         username = sanitize(request.form.get("username"))
         password = sanitize(request.form.get("password"))
-        # command = f"select id from users where name = '{username}' and password = crypt('{password}', password)"
-        # result = db.execute(command)
         result = db.execute("select id from users where name = :username and password = crypt(:password, password)",
                             {"username": username, "password": password})
         if result.rowcount == 0:
@@ -75,14 +73,11 @@ def newuser():
     if request.method == "POST":
         username = sanitize(request.form.get("username"))
         password = sanitize(request.form.get("password"))
-        # check if user already exists
         if db.execute("select id from users where name = :username", {"username": username}).rowcount > 0:
             error["header"] = "User already exist"
             error["message"] = "Pick another name, because the one you have choosen is already taken"
             return render_template("error.html", error=error)
         else:
-            # command = f"insert into users (name, password) values ('{username}', crypt('{password}', gen_salt('bf')))"
-            # db.execute(command)
             db.execute("insert into users (name, password) values (:username, crypt(:password, gen_salt('bf')))",
                        {"username": username, "password": password})
             db.commit()
@@ -99,7 +94,9 @@ def logout():
 @app.route("/search", methods=["POST"])
 def search():
     if session["userid"] is None or session["userid"] == 0:
-        return "Authenticate first"
+        error["header"] = "Authenticate first!"
+        error["message"] = "Please login at the wellcome page and submit valid credentials or register new user"
+        return render_template("error.html", error=error)
     field = sanitize(request.form.get("field"))
     value = sanitize(request.form.get("value"))
     command = "select * from books where {} ilike '%{}%'".format(field, value)
@@ -110,10 +107,10 @@ def search():
 @app.route("/book/<int:bookid>")
 def book(bookid):
     if session["userid"] is None or session["userid"] == 0:
-        return "Authenticate first"
+        error["header"] = "Authenticate first!"
+        error["message"] = "Please login at the wellcome page and submit valid credentials or register new user"
+        return render_template("error.html", error=error)
     # get information about the book
-    # command = f"select * from books where id = {bookid}"
-    # bookinfo = db.execute(command).fetchone()
     bookinfo = db.execute("select * from books where id = :bookid",
                           {"bookid": bookid}).fetchone()
     # todo: check if review already exists and hide the form
@@ -123,8 +120,6 @@ def book(bookid):
     else:
         noReview = True
     # get all reviews for this book
-    # command = f"select rating, comments, name from reviews join users on (reviews.userid = users.id) where bookid = {bookid}"
-    # reviews = db.execute(command).fetchall()
     reviews = db.execute("select rating, comments, name from reviews join users on (reviews.userid = users.id) where bookid = :bookid",
                          {"bookid": bookid}).fetchall()
     # get rating from goodreads
@@ -135,32 +130,27 @@ def book(bookid):
     goodreads = {}
     goodreads["average_rating"] = res.json()["books"][0]["average_rating"]
     goodreads["ratings_count"] = res.json()["books"][0]["ratings_count"]
-    result = [bookinfo, reviews, goodreads, noReview]
-    return render_template("book.html", result=result)
+    return render_template("book.html", bookinfo=bookinfo, reviews=reviews, goodreads=goodreads, noReview=noReview)
 
 
 @app.route("/review", methods=["POST"])
 def review():
     if session["userid"] is None or session["userid"] == 0:
-        return "Authenticate first"
+        error["header"] = "Authenticate first!"
+        error["message"] = "Please login at the wellcome page and submit valid credentials or register new user"
+        return render_template("error.html", error=error)
     userid = session['userid']
     bookid = request.form.get('bookid')
     reviewtext = sanitize(request.form.get('reviewtext'))
     rating = request.form.get('rating')
-
-    # todo: check if review already exists and hide the form
     if db.execute("select id from reviews where userid= :userid and bookid= :bookid",
                   {"userid": userid, "bookid": bookid}).rowcount > 0:
         error["header"] = "Error happened when submitting your review"
         error["message"] = "It appears you have already submitted review for this book"
         return render_template("error.html", error=error)
-
-    # command = f"insert into reviews(bookid, userid, rating, comments) values ({bookid}, {userid}, {rating}, '{reviewtext}')"
-    # db.execute(command)
     db.execute("insert into reviews(bookid, userid, rating, comments) values (:bookid, :userid, :rating, :reviewtext)",
                {"bookid": bookid, "userid": userid, "rating": rating, "reviewtext": reviewtext})
     db.commit()
-    # return render_template("store.html")
     return book(bookid)
 
 
@@ -177,7 +167,6 @@ def api(isbn):
     res["author"] = bookinfo.author
     res["year"] = bookinfo.year
     res["isbn"] = bookinfo.isbn
-
     result = db.execute("select count(*) as count, to_char(avg(rating),'9D9') as score from reviews where bookid = :bookid",
                         {"bookid": bookinfo.id})
     review = result.fetchone()

@@ -71,19 +71,19 @@
     <div class="container-fluid">
         <h1>Book card</h1>
         <div class="card border-dark mb-3" style="max-width: 18rem;">
-            <div class="card-header">{{ result[0].title }}</div>
+            <div class="card-header">{{ bookinfo.title }}</div>
             <div class="card-body text-dark">
-                <h5 class="card-title">{{ result[0].author }}</h5>
-                <p class="card-text">Publication year {{ result[0].year }}
-                    <br> ISBN {{ result[0].isbn }}</p>
-                {% if result[2]["ratings_count"] != 0 %}
-                <p class="card-text">Goodreads reviews {{ result[2]["ratings_count"] }}
-                    <br> Goodreads rating {{ result[2]["average_rating"] }}</p>
+                <h5 class="card-title">{{ bookinfo.author }}</h5>
+                <p class="card-text">Publication year {{ bookinfo.year }}
+                    <br> ISBN {{ bookinfo.isbn }}</p>
+                {% if goodreads["ratings_count"] != 0 %}
+                <p class="card-text">Goodreads reviews {{ goodreads["ratings_count"] }}
+                    <br> Goodreads rating {{ goodreads["average_rating"] }}</p>
                 {% endif %}
             </div>
 
         </div>
-        {% if result[1] %}
+        {% if reviews %}
         <h2>Reviews</h2>
         <table class="table table-light">
             <tr>
@@ -91,7 +91,7 @@
                 <th>comments</th>
                 <th>user</th>
             </tr>
-            {% for review in result[1] %}
+            {% for review in reviews %}
             <tr>
                 <td>{{ review.rating }}</td>
                 <td>{{ review.comments }}</td>
@@ -99,11 +99,11 @@
             </tr>
             {% endfor %}
         </table>
-        {% endif %} {% if result[3] %}
+        {% endif %} {% if noReview %}
 
         <h2>Submit your review</h2>
         <form action="{{ url_for('review') }}" method="POST">
-            <input type="text" hidden name="bookid" value="{{ result[0].id }}">
+            <input type="text" hidden name="bookid" value="{{ bookinfo.id }}">
 
             <div class="form-group">
                 <label for="exampleFormControlTextarea1">Review text</label>
