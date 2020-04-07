@@ -25,8 +25,8 @@ error = {}
 
 
 def sanitize(input):
-    temp = input.replace("'", "")
-    result = temp.replace('"', '')
+    result = input.replace("'", "")
+    result = result.replace('"', '')
     result = re.sub(" +", " ", result)
     return result.strip()
 
