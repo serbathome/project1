@@ -1,0 +1,23 @@
+{
+  "name": "project1",
+  "version": "1.0.0",
+  "description": "Web Programming with Python and JavaScript",
+  "main": "index.js",
+  "dependencies": {
+    "eslint": "^5.16.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/serbathome/project1.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/serbathome/project1/issues"
+  },
+  "homepage": "https://github.com/serbathome/project1#readme"
+}

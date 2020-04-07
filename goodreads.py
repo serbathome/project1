@@ -1,10 +1,11 @@
 
 # KjCyt6CenkdHwgu2qQHo3w his key
 # nFyzewnTjIGn2qGdZ2dQ my key
-isbn = "0812995341"
-
-import requests
 import json
+import requests
+
+
+isbn = "0812995341"
 
 
 res = requests.get("https://www.goodreads.com/book/review_counts.json",
