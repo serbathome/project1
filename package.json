@@ -4,7 +4,7 @@
   "description": "Web Programming with Python and JavaScript",
   "main": "index.js",
   "dependencies": {
-    "eslint": "^5.16.0"
+    "eslint": "^8.43.0"
   },
   "devDependencies": {},
   "scripts": {
